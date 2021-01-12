@@ -1,0 +1,67 @@
+{
+  "id": "1d001198-39e5-4979-aea7-77c5c6a36d4c",
+  "params": {
+    "nodeType": "pod",
+    "criteria": [
+      {
+        "comparator": ">",
+        "timeSize": 5,
+        "metric": "cpu",
+        "threshold": [
+          70
+        ],
+        "timeUnit": "m"
+      }
+    ],
+    "sourceId": "default"
+  },
+  "consumer": "metrics",
+  "alertTypeId": "metrics.alert.inventory.threshold",
+  "schedule": {
+    "interval": "5m"
+  },
+  "actions": [
+    {
+      "actionTypeId": ".index",
+      "params": {
+        "documents": [
+          {
+            "alerts_id": "{{alertId}}",
+            "alert_group": "{{alertInstanceId}}",
+            "alert_severity": "CRITICAL",
+            "alert_reason": "{{context.reason}}",
+            "alert_state": "{{context.alertState}}",
+            "alert_type": "CPU",
+            "alert_timestamp": "{{context.timestamp}}"
+          }
+        ]
+      },
+      "group": "metrics.invenotry_threshold.fired",
+      "id": "94b9bc46-e9eb-465d-9541-7d8819f8e707"
+    },
+    {
+      "actionTypeId": ".email",
+      "params": {
+        "subject": "POD CPU USAGE CRITICAL  ALERT",
+        "to": [
+          "uat-elk@nbbdev.com.bh"
+        ],
+        "message": "{{alertName}} - {{context.group}} is in a state of {{context.alertState}}\n\nReason:\n{{context.reason}}\n"
+      },
+      "group": "metrics.invenotry_threshold.fired",
+      "id": "ccc83b92-59f2-4f07-8f05-6a1d44a0bb37"
+    }
+  ],
+  "tags": [],
+  "name": "POD CPU USAGE CRITICAL ",
+  "enabled": true,
+  "throttle": null,
+  "apiKeyOwner": "elastic",
+  "createdBy": "elastic",
+  "updatedBy": "elastic",
+  "createdAt": "2020-12-10T08:26:13.028Z",
+  "muteAll": false,
+  "mutedInstanceIds": [],
+  "scheduledTaskId": "5d55b810-3ac1-11eb-a903-0b35e10b6ffb",
+  "updatedAt": "2021-01-09T17:37:07.144Z"
+}

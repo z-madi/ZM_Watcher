@@ -1,0 +1,72 @@
+{
+  "id": "06aedcf1-7a63-4de8-9b34-dae1d917948d",
+  "params": {
+    "aggType": "count",
+    "termSize": 300,
+    "thresholdComparator": ">",
+    "timeWindowSize": 5,
+    "timeWindowUnit": "m",
+    "groupBy": "top",
+    "threshold": [
+      20
+    ],
+    "index": [
+      "apm-7.9.3-error"
+    ],
+    "timeField": "@timestamp",
+    "termField": "kubernetes.pod.name"
+  },
+  "consumer": "alerts",
+  "alertTypeId": ".index-threshold",
+  "schedule": {
+    "interval": "5m"
+  },
+  "actions": [
+    {
+      "actionTypeId": ".index",
+      "params": {
+        "documents": [
+          {
+            "alerts_id": "{{alertId}}",
+            "alert_group": "{{alertInstanceId}}",
+            "alert_severity": "CRITICAL",
+            "errors_number": "{{context.value}}",
+            "alert_reason": "{{context.message}}",
+            "alert_type": "TRANSACTION ERROR",
+            "alert_timestamp": "{{context.date}}"
+          }
+        ]
+      },
+      "group": "threshold met",
+      "id": "f74ea3d7-81ba-4a6d-8d17-dcfb391637f7"
+    },
+    {
+      "actionTypeId": ".email",
+      "params": {
+        "subject": "TRANSACTIONS ERRORS RATE CRITICAL ALERT",
+        "to": [
+          "uat-elk@nbbdev.com.bh"
+        ],
+        "message": "{{alertName}} - {{context.group}} is in a state of {{context.alertState}}\n\nReason:\n{{context.reason}}"
+      },
+      "group": "threshold met",
+      "id": "ccc83b92-59f2-4f07-8f05-6a1d44a0bb37"
+    }
+  ],
+  "tags": [
+    "apm",
+    "error",
+    "transaction"
+  ],
+  "name": "TRANSACTIONS ERRORS RATE CRITICAL",
+  "enabled": true,
+  "throttle": null,
+  "apiKeyOwner": "elastic",
+  "createdBy": "elastic",
+  "updatedBy": "elastic",
+  "createdAt": "2020-12-10T12:46:10.568Z",
+  "muteAll": false,
+  "mutedInstanceIds": [],
+  "scheduledTaskId": "ae459690-3ae5-11eb-a903-0b35e10b6ffb",
+  "updatedAt": "2021-01-09T17:58:40.495Z"
+}

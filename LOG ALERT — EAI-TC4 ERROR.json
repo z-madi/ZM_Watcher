@@ -1,0 +1,109 @@
+// LOG ALERT — EAI-TC4 ERROR
+PUT _watcher/watch/3770cd4b-52d8-44c2-8d5a-cf08b38e5ee3
+{
+  "trigger": {
+    "schedule": {
+      "interval": "5m"
+    }
+  },
+  "input": {
+    "search": {
+      "request": {
+        "search_type": "query_then_fetch",
+        "indices": [
+          "filebeat-*"
+        ],
+        "rest_total_hits_as_int": true,
+        "body": {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "match_phrase_prefix": {
+                    "message": "EAI-TC4"
+                  }
+                },
+                {
+                  "range": {
+                    "@timestamp": {
+                      "from": "now-5m",
+                      "to": "now"
+                    }
+                  }
+                }
+              ],
+              "must_not": [
+                {
+                  "match_phrase_prefix": {
+                    "message": "EAI-TC4-000"
+                  }
+                }
+              ]
+            }
+          },
+          "_source": [
+            "message",
+            "log.level",
+            "kubernetes.container.name"
+          ],
+          "sort": [
+            {
+              "@timestamp": {
+                "order": "desc"
+              }
+            }
+          ],
+          "size": 100
+        }
+      }
+    }
+  },
+  "condition": {
+    "compare": {
+      "ctx.payload.hits.total": {
+        "gt": 0
+      }
+    }
+  },
+  "actions": {
+    "index_payload": {
+      "transform": {
+        "script": {
+          "source": """
+      def documents = ctx.payload.hits.hits.stream()
+        .map(hit -> [
+          "_index": "watcher-logs-alerts", 
+          "_id": hit._id, 
+          "alert_timestamp": new Date(),
+          "alert_type": "EAI-TC4 ERROR",
+          "log.level": hit._source.log.level,
+          "kubernetes.container.name": hit._source.kubernetes.container.name, 
+          "message":hit._source.message,
+          "alert_message": "Component " + hit._source.kubernetes.container.name + " has EAI-TC4 ERROR logs: " + hit._source.message
+        ])
+        .collect(Collectors.toList());
+      return [ "_doc" : documents]; 
+      """,
+          "lang": "painless"
+        }
+      },
+      "index": {}
+    },
+	  "send_email" : { 
+      "throttle_period": "5m",
+	  "email" : {
+        "to" : "uat-elk@nbbdev.com.bh", 
+        "subject" : "Watcher-Logs-Alerts:: EAI-TC4 ERROR", 
+        "body" : {
+			"html": """<html><body><p>Dears,</p><p>{{ctx.payload.hits.total}} error logs found.</p> <p><a href="https://10.104.110.48:5610/app/dashboards#/view/a5b22e40-3dcd-11eb-a903-0b35e10b6ffb">Go-To Dashboard</a> </p><p>Event List: </p> <p>{{#ctx.payload.hits.hits}}<p><a href="https://10.104.110.48:5610/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'filebeat-*',key:_id,negate:!f,params:(query:{{_id}}),type:phrase),query:(match_phrase:(_id:{{_id}})))),index:'filebeat-*',interval:auto,query:(language:kuery,query:''),sort:!())">{{_id}}</a></p>{{/ctx.payload.hits.hits}}</p></html></body>"""
+			}
+		}
+	}
+  },
+  "metadata" : {
+      "name" : "LOG ALERT — EAI-RLC ERROR",
+      "xpack" : {
+        "type" : "json"
+      }
+    }
+}

@@ -1,0 +1,71 @@
+{
+  "id": "030e570e-e0b8-4557-81b7-0aeabdd1eca0",
+  "params": {
+    "criteria": [
+      {
+        "comparator": "between",
+        "timeSize": 5,
+        "metric": "kubernetes.node.fs.used.pct",
+        "aggType": "max",
+        "threshold": [
+          0.8,
+          0.9
+        ],
+        "timeUnit": "m"
+      }
+    ],
+    "sourceId": "default",
+    "groupBy": [
+      "kubernetes.node.name"
+    ]
+  },
+  "consumer": "alerts",
+  "alertTypeId": "metrics.alert.threshold",
+  "schedule": {
+    "interval": "5m"
+  },
+  "actions": [
+    {
+      "actionTypeId": ".index",
+      "params": {
+        "documents": [
+          {
+            "alerts_id": "{{alertId}}",
+            "alert_group": "{{alertInstanceId}}",
+            "alert_severity": "WARNING",
+            "alert_reason": "{{context.reason}}",
+            "alert_state": "{{context.alertState}}",
+            "alert_type": "FILE SYSTEM",
+            "alert_timestamp": "{{context.timestamp}}"
+          }
+        ]
+      },
+      "group": "metrics.threshold.fired",
+      "id": "81ddf176-89cc-4309-8c29-441144c94737"
+    },
+    {
+      "actionTypeId": ".email",
+      "params": {
+        "subject": "NODES DISK USAGE WARNING ALERT",
+        "to": [
+          "uat-elk@nbbdev.com.bh"
+        ],
+        "message": "{{alertName}} - {{context.group}} is in a state of {{context.alertState}}\n\nReason:\n{{context.reason}}\n"
+      },
+      "group": "metrics.threshold.fired",
+      "id": "ccc83b92-59f2-4f07-8f05-6a1d44a0bb37"
+    }
+  ],
+  "tags": [],
+  "name": "NODES DISK USAGE WARNING",
+  "enabled": true,
+  "throttle": null,
+  "apiKeyOwner": "elastic",
+  "createdBy": "elastic",
+  "updatedBy": "elastic",
+  "createdAt": "2020-12-09T08:57:45.315Z",
+  "muteAll": false,
+  "mutedInstanceIds": [],
+  "scheduledTaskId": "9b30caa0-39fc-11eb-a903-0b35e10b6ffb",
+  "updatedAt": "2021-01-09T17:35:33.452Z"
+}

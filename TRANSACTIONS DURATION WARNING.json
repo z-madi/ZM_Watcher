@@ -1,0 +1,74 @@
+{
+  "id": "b22ca333-1786-4464-bfee-ae04a1438acd",
+  "params": {
+    "aggType": "avg",
+    "termSize": 300,
+    "thresholdComparator": "between",
+    "timeWindowSize": 5,
+    "timeWindowUnit": "m",
+    "groupBy": "top",
+    "threshold": [
+      15000000,
+      30000000
+    ],
+    "index": [
+      "apm-7.9.3-transaction"
+    ],
+    "timeField": "@timestamp",
+    "aggField": "transaction.duration.us",
+    "termField": "kubernetes.pod.name"
+  },
+  "consumer": "alerts",
+  "alertTypeId": ".index-threshold",
+  "schedule": {
+    "interval": "5m"
+  },
+  "actions": [
+    {
+      "actionTypeId": ".index",
+      "params": {
+        "documents": [
+          {
+            "alerts_id": "{{alertId}}",
+            "alert_group": "{{alertInstanceId}}",
+            "alert_severity": "WARNING",
+            "errors_number": "{{context.value}}",
+            "alert_reason": "{{context.message}}",
+            "alert_type": "TRANSACTION DURATION",
+            "alert_timestamp": "{{context.date}}"
+          }
+        ]
+      },
+      "group": "threshold met",
+      "id": "fee28bb8-a147-44ec-8727-80d5f48a200f"
+    },
+    {
+      "actionTypeId": ".email",
+      "params": {
+        "subject": "TRANSACTIONS DURATION WARNING ALERT",
+        "to": [
+          "uat-elk@nbbdev.com.bh"
+        ],
+        "message": "{{alertName}} - {{context.group}} is in a state of {{context.alertState}}\n\nReason:\n{{context.reason}}"
+      },
+      "group": "threshold met",
+      "id": "ccc83b92-59f2-4f07-8f05-6a1d44a0bb37"
+    }
+  ],
+  "tags": [
+    "apm",
+    "transaction",
+    "warning"
+  ],
+  "name": "TRANSACTIONS DURATION WARNING",
+  "enabled": true,
+  "throttle": null,
+  "apiKeyOwner": "elastic",
+  "createdBy": "elastic",
+  "updatedBy": "elastic",
+  "createdAt": "2020-12-10T13:28:48.202Z",
+  "muteAll": false,
+  "mutedInstanceIds": [],
+  "scheduledTaskId": "a30f0c10-3aeb-11eb-a903-0b35e10b6ffb",
+  "updatedAt": "2021-01-09T17:54:46.324Z"
+}
